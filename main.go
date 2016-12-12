@@ -7,31 +7,11 @@ import (
 	"os"
 )
 
-type SmnStation struct {
-	Code      string
-	Name      string
-	Ch1903Y   int
-	Ch1903X   int
-	Lat       int
-	Lng       int
-	Elevation int
-}
-
-type SmnRecord struct {
-	Station       SmnStation
-	Code          string
-	DateTime      string
-	Temperature   string
-	Sunshine      string
-	Precipitation string
-	WindDirection string
-	WindSpeed     string
-	QnhPressure   string
-	GustPeak      string
-	Humidity      string
-	QfePressure   string
-	QffPressure   string
-}
+const (
+	MyDB     = "smn"
+	username = "smn"
+	password = "smn"
+)
 
 func getJson(url string, target interface{}) error {
 	r, err := http.Get(url)
@@ -44,10 +24,15 @@ func getJson(url string, target interface{}) error {
 }
 
 func main() {
-	station := os.Args[1]
-	url := fmt.Sprintf("http://opendata.netcetera.com:80/smn/smn/%s", station)
+	if len(os.Args) <= 1 {
+		println("Usage: climate_reporter <code>")
+		os.Exit(1)
+	}
 
-	record := new(SmnRecord)
+	url := fmt.Sprintf("http://opendata.netcetera.com:80/smn/smn/%s", os.Args[1])
+	record := &SmnRecord{Code: os.Args[1]}
 	getJson(url, record)
-	println(record.Temperature)
+
+	convertedRecord := convertRecord(record)
+	writeToInflux(convertedRecord)
 }
