@@ -41,7 +41,7 @@ type SmnRecordConverted struct {
 	WindSpeed     float64
 }
 
-func convertRecord(record *SmnRecord) *SmnRecordConverted {
+func ConvertRecord(record *SmnRecord) *SmnRecordConverted {
 	recordConverted := new(SmnRecordConverted)
 
 	recordConverted.Code = record.Code
@@ -49,6 +49,7 @@ func convertRecord(record *SmnRecord) *SmnRecordConverted {
 	recordConverted.Humidity, _ = strconv.ParseFloat(record.Humidity, 32)
 	recordConverted.Sunshine, _ = strconv.ParseFloat(record.Sunshine, 32)
 	recordConverted.WindSpeed, _ = strconv.ParseFloat(record.WindSpeed, 32)
+	recordConverted.Precipitation, _ = strconv.ParseFloat(record.Precipitation, 32)
 	recordConverted.Time, _ = time.Parse(time.RFC3339, record.DateTime)
 
 	return recordConverted

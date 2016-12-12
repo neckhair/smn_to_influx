@@ -7,12 +7,6 @@ import (
 	"os"
 )
 
-const (
-	MyDB     = "smn"
-	username = "smn"
-	password = "smn"
-)
-
 func getJson(url string, target interface{}) error {
 	r, err := http.Get(url)
 	if err != nil {
@@ -24,6 +18,16 @@ func getJson(url string, target interface{}) error {
 }
 
 func main() {
+	if os.Getenv("INFLUXDB_DATABASE") == "" {
+		println("Please set INFLUXDB_DATABASE.")
+		os.Exit(1)
+	}
+
+	if os.Getenv("INFLUXDB_URL") == "" {
+		println("Please set INFLUXDB_URL.")
+		os.Exit(1)
+	}
+
 	if len(os.Args) <= 1 {
 		println("Usage: climate_reporter <code>")
 		os.Exit(1)
@@ -33,6 +37,12 @@ func main() {
 	record := &SmnRecord{Code: os.Args[1]}
 	getJson(url, record)
 
-	convertedRecord := convertRecord(record)
-	writeToInflux(convertedRecord)
+	influxConfig := &InfluxdbConfig{
+		Url:      os.Getenv("INFLUXDB_URL"),
+		Database: os.Getenv("INFLUXDB_DATABASE"),
+		Username: os.Getenv("INFLUXDB_USERNAME"),
+		Password: os.Getenv("INFLUXDB_PASSWORD")}
+
+	convertedRecord := ConvertRecord(record)
+	WriteToInflux(convertedRecord, influxConfig)
 }

@@ -5,12 +5,18 @@ import (
 	"log"
 )
 
-func writeToInflux(record *SmnRecordConverted) {
-	// Make client
+type InfluxdbConfig struct {
+	Username string
+	Password string
+	Url      string
+	Database string
+}
+
+func WriteToInflux(record *SmnRecordConverted, config *InfluxdbConfig) {
 	c, err := client.NewHTTPClient(client.HTTPConfig{
-		Addr: "http://localhost:8086",
-		// Username: username,
-		// Password: password,
+		Addr:     config.Url,
+		Username: config.Username,
+		Password: config.Password,
 	})
 
 	if err != nil {
@@ -19,7 +25,7 @@ func writeToInflux(record *SmnRecordConverted) {
 
 	// Create a new point batch
 	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
-		Database:  MyDB,
+		Database:  config.Database,
 		Precision: "m",
 	})
 
@@ -30,13 +36,14 @@ func writeToInflux(record *SmnRecordConverted) {
 	// Create a point and add to batch
 	tags := map[string]string{"station": record.Code}
 	fields := map[string]interface{}{
-		"temperature": record.Temperature,
-		"humidity":    record.Humidity,
-		"windspeed":   record.WindSpeed,
-		"sunshine":    record.Sunshine,
+		"temperature":   record.Temperature,
+		"humidity":      record.Humidity,
+		"windspeed":     record.WindSpeed,
+		"sunshine":      record.Sunshine,
+		"precipitation": record.Precipitation,
 	}
 
-	pt, err := client.NewPoint("climate", tags, fields, record.Time)
+	pt, err := client.NewPoint("smn", tags, fields, record.Time)
 
 	if err != nil {
 		log.Fatalln("Error: ", err)
