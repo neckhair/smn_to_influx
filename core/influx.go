@@ -42,6 +42,7 @@ func WriteToInflux(record *SmnRecordConverted, config *InfluxdbConfig) {
 		"sunshine":      record.Sunshine,
 		"precipitation": record.Precipitation,
 		"gustpeak":      record.GustPeak,
+		"pressure":      record.QfePressure,
 	}
 
 	pt, err := client.NewPoint("smn", tags, fields, record.Time)
