@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+
+	"github.com/neckhair/smn_to_influx/core"
 )
 
 func getJson(url string, target interface{}) error {
@@ -29,20 +31,20 @@ func main() {
 	}
 
 	if len(os.Args) <= 1 {
-		println("Usage: climate_reporter <code>")
+		println("Usage: smn_to_influx <code>")
 		os.Exit(1)
 	}
 
 	url := fmt.Sprintf("http://opendata.netcetera.com:80/smn/smn/%s", os.Args[1])
-	record := &SmnRecord{Code: os.Args[1]}
+	record := &core.SmnRecord{Code: os.Args[1]}
 	getJson(url, record)
 
-	influxConfig := &InfluxdbConfig{
+	influxConfig := &core.InfluxdbConfig{
 		Url:      os.Getenv("INFLUXDB_URL"),
 		Database: os.Getenv("INFLUXDB_DATABASE"),
 		Username: os.Getenv("INFLUXDB_USERNAME"),
 		Password: os.Getenv("INFLUXDB_PASSWORD")}
 
-	convertedRecord := ConvertRecord(record)
-	WriteToInflux(convertedRecord, influxConfig)
+	convertedRecord := core.ConvertRecord(record)
+	core.WriteToInflux(convertedRecord, influxConfig)
 }
